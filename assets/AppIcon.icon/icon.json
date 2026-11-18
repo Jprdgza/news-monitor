@@ -1,0 +1,27 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "srgb:0.14902,0.16471,0.21569,1.00000",
+      "srgb:0.07059,0.07843,0.10588,1.00000"
+    ]
+  },
+  "groups" : [
+    {
+      "layers" : [
+        { "image-name" : "signal.svg", "name" : "signal" }
+      ],
+      "shadow" : { "kind" : "layer-color", "opacity" : 0.6 },
+      "translucency" : { "enabled" : false, "value" : 0.5 }
+    },
+    {
+      "layers" : [
+        { "image-name" : "bars.svg", "name" : "bars" }
+      ],
+      "shadow" : { "kind" : "neutral", "opacity" : 0.5 },
+      "translucency" : { "enabled" : true, "value" : 0.3 }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : [ "macOS" ]
+  }
+}

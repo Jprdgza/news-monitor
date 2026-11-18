@@ -115,6 +115,26 @@ export function isHttpUrl(s: unknown, httpsOnly = false): boolean {
   }
 }
 
+/** Is this an http(s) URL on a public host? (Refuses localhost, private IPs, .local names.) */
+export function isPublicHttpUrl(url: string): boolean {
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    return false;
+  }
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') return false;
+  if (u.username || u.password) return false;
+  const h = u.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+  if (!h.includes('.') || /\.(local|localhost|internal|lan|home|test)$/.test(h)) return false;
+  if (/^[\d.]+$/.test(h)) {
+    const [a, b] = h.split('.').map(Number);
+    if (a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127)) return false;
+  }
+  if (h.includes(':')) return false; // IPv6 literals
+  return true;
+}
+
 function validRegex(s: unknown): s is string {
   if (typeof s !== 'string' || s.length > 500) return false;
   try {

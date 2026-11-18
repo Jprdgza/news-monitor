@@ -54,7 +54,10 @@ function renderChrome() {
   document.querySelector<HTMLButtonElement>('[data-nav="forward"]')!.disabled = !active?.canGoForward;
   let host = '';
   try {
-    host = active?.url ? new URL(active.url).hostname.replace(/^www\./, '') + new URL(active.url).pathname.replace(/\/$/, '') : '';
+    if (active?.url) {
+      const u = new URL(active.url);
+      host = (u.protocol === 'http:' ? 'Not secure · ' : '') + u.hostname.replace(/^www\./, '') + u.pathname.replace(/\/$/, '');
+    }
   } catch {
     /* ignore */
   }

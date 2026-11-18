@@ -10,6 +10,7 @@ import { ElectronBlocker } from '@ghostery/adblocker-electron';
 import { getConfig } from './config';
 import { log } from './log';
 import { partitionFor } from './sources';
+import { THEME_PRELOAD } from './theme';
 
 /** webContents ids of hidden check windows: these skip images, media and fonts. */
 export const lightweightContents = new Set<number>();
@@ -84,6 +85,8 @@ export function prepareSession(id: string): Session {
     // News sites never need the camera, location or notification permission here.
     ses.setPermissionRequestHandler((_wc, permission, cb) => cb(ALLOWED_PERMISSIONS.has(permission)));
     ses.setPermissionCheckHandler((_wc, permission) => ALLOWED_PERMISSIONS.has(permission));
+    // Reading theme (does nothing outside visible tabs, or while the theme is off).
+    ses.registerPreloadScript({ type: 'frame', filePath: THEME_PRELOAD });
     attach(ses, id);
   }
   return ses;

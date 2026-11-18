@@ -11,8 +11,11 @@ import { cleanUserAgent, initBlocker, prepareSession, refreshSessions } from './
 import { activeSources, allSources, findSource, ownsUrl, partitionFor, PRESETS, extractionScript, type ExtractionResult } from './sources';
 import { runInHiddenPage } from './pageLoader';
 import { store } from './store';
-import { applyPageTheme, palette, themedFor, themeOptions } from './theme';
+import { palette, pushTheme, registerThemeIpc, themedFor, themeOptions } from './theme';
 import { Watcher } from './watcher';
+import { flushCookies, isIdentityProvider, labelPopup, POPUP_OPTIONS, prepareCookieMigration, reencryptCookies, refuseRemoteDebugging } from './security';
+
+refuseRemoteDebugging();
 
 // Layout constants (must match styles.css).
 const TOP_BAR = 48;
@@ -21,15 +24,6 @@ const SIDEBAR = 420;
 const RESTORE_URL_MS = 30 * 60_000; // reopen a tab where you left it if it was unloaded recently
 
 const args = process.argv.slice(1);
-/** Sign-in popups (Google/Apple/Facebook, publisher SSO) are recognised by their host. */
-const AUTH_HOST = /(^|\.)(accounts\.google\.com|appleid\.apple\.com|facebook\.com)$|(^|[.-])(login|sso|auth|accounts?)[.-]/i;
-const hostOf = (url: string) => {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return '';
-  }
-};
 const DRY_RUN = args.includes('--dry-run');
 const ONCE = args.includes('--once');
 const CHECK_SOURCES = args.includes('--check-sources');
@@ -74,18 +68,41 @@ app.on('web-contents-created', (_e, contents) => {
   contents.on('will-attach-webview', (e) => e.preventDefault());
   // Default for any page (sign-in popups included); site tabs and app windows set their own.
   contents.setWindowOpenHandler(({ url }) => {
-    if (AUTH_HOST.test(hostOf(url))) return { action: 'allow' };
+    if (isIdentityProvider(url)) return { action: 'allow', overrideBrowserWindowOptions: POPUP_OPTIONS };
     if (/^https?:/i.test(url)) shell.openExternal(url);
     return { action: 'deny' };
   });
+  contents.on('did-create-window', (child) => labelPopup(child, () => void flushCookies([contents.session])));
+  // Pages may only navigate to web pages (no file:, custom app schemes, etc.).
+  contents.on('will-navigate', (e, url) => {
+    if (!/^https?:/i.test(url)) e.preventDefault();
+  });
+  contents.on('will-redirect', (e, url) => {
+    if (!/^https?:/i.test(url)) e.preventDefault();
+  });
+});
+
+// Make sure a fresh sign-in is on disk before the app exits.
+let cookiesFlushed = false;
+app.on('will-quit', (e) => {
+  if (cookiesFlushed) return;
+  e.preventDefault();
+  cookiesFlushed = true;
+  const sessions = [...tabs.keys()].map((id) => prepareSession(id));
+  void flushCookies(sessions).finally(() => app.quit());
 });
 
 app.whenReady().then(async () => {
   if (!gotLock) return;
   app.userAgentFallback = cleanUserAgent(app.userAgentFallback);
   loadConfig();
+  prepareCookieMigration(); // before any session opens its cookie database
   store.load();
   watchConfig();
+  registerThemeIpc((wc) => {
+    for (const [id, tab] of tabs) if (tab.view?.webContents === wc) return id;
+    return undefined;
+  });
   log.info(`News Monitor starting${DRY_RUN ? ' (dry run)' : ''}${ONCE ? ' (single check)' : ''}. userData: ${app.getPath('userData')}`);
 
   // Start at login only from /Applications (so a copy in a build folder never registers itself).
@@ -126,7 +143,7 @@ app.whenReady().then(async () => {
       if (!tab.view) continue;
       const themed = themedFor(getConfig(), id);
       tab.view.setBackgroundColor(themed ? palette(getConfig()).bg : '#ffffff');
-      void applyPageTheme(tab.view.webContents, getConfig(), themed);
+      pushTheme(tab.view.webContents, getConfig(), id);
     }
     watcher.scheduleNext();
     pushState();
@@ -137,6 +154,8 @@ app.whenReady().then(async () => {
   if (process.env.NEWS_MONITOR_METRICS) startMetrics();
 
   await blockerReady;
+  // One-time: cookies saved before encryption was enabled are rewritten encrypted.
+  await reencryptCookies(prepareSession).catch((err) => log.warn(`Cookie re-encryption failed: ${err}`));
   if (DEV && process.env.NEWS_MONITOR_BENCH) return runBench();
   watcher.start();
   setTimeout(() => watcher.runCheck('startup'), 3000);
@@ -264,7 +283,11 @@ function ensureView(id: string) {
   const source = findSource(getConfig(), id);
   if (!tab || !source || !win || tab.view) return;
   prepareSession(id);
-  const view = new WebContentsView({ webPreferences: { partition: partitionFor(id), contextIsolation: true, sandbox: true, spellcheck: false } });
+  // nodeIntegrationInSubFrames only runs the session preloads (theme, cosmetic ad filters) in
+  // iframes too; pages stay sandboxed with no Node access.
+  const view = new WebContentsView({
+    webPreferences: { partition: partitionFor(id), contextIsolation: true, sandbox: true, spellcheck: false, nodeIntegrationInSubFrames: true },
+  });
   const cfg = getConfig();
   view.setBackgroundColor(themedFor(cfg, id) ? palette(cfg).bg : '#ffffff');
   const wc = view.webContents;
@@ -278,9 +301,11 @@ function ensureView(id: string) {
       pushState();
     });
   }
-  wc.on('dom-ready', () => {
-    const c = getConfig();
-    if (themedFor(c, id)) void applyPageTheme(wc, c, true);
+  // A sign-in usually ends in a redirect; get its cookies onto disk soon after.
+  let flushTimer: NodeJS.Timeout | undefined;
+  wc.on('did-navigate', () => {
+    clearTimeout(flushTimer);
+    flushTimer = setTimeout(() => void flushCookies([wc.session]), 5000);
   });
   wc.on('render-process-gone', () => {
     log.warn(`${source.short} tab crashed; it will reload when opened`);
@@ -367,7 +392,7 @@ function openStory(sourceId: string, url: string, storyId?: string) {
 }
 
 /** Links that open a new window: keep a source's links in its tab, allow sign-in popups, send the rest to the browser. */
-function handleNewWindow(sourceId: string, url: string): { action: 'allow' | 'deny' } {
+function handleNewWindow(sourceId: string, url: string): Electron.WindowOpenHandlerResponse {
   let host = '';
   let protocol = '';
   try {
@@ -378,7 +403,10 @@ function handleNewWindow(sourceId: string, url: string): { action: 'allow' | 'de
     /* about:blank etc. */
   }
   const source = findSource(getConfig(), sourceId);
-  if (!host || AUTH_HOST.test(host)) return { action: 'allow' };
+  // Third-party sign-in (Google, Apple, …) opens as a popup whose title shows the real host.
+  // Anything else, including blank windows a page could fill with a fake form, never opens here.
+  if (isIdentityProvider(url)) return { action: 'allow', overrideBrowserWindowOptions: POPUP_OPTIONS };
+  if (!host) return { action: 'deny' };
   if (source && ownsUrl(source, url)) {
     tabs.get(sourceId)?.view?.webContents.loadURL(url).catch(() => {});
     return { action: 'deny' };

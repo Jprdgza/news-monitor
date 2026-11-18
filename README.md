@@ -18,7 +18,7 @@ It runs entirely on your Mac. There are no servers, accounts, AI APIs or telemet
 - **Alert inbox** has a badge for anything you missed. The menu bar panel shows what's flagged right now.
 - **Your logins.** Each source has its own persistent browser session, so checks see what a subscriber sees. You get a notification if a session expires.
 - **Built-in ad and tracker blocking**, using EasyList/EasyPrivacy-based lists.
-- **Reading themes.** Optional [Catppuccin](https://github.com/catppuccin/catppuccin) palettes (Latte, Frappé, Macchiato, Mocha, with 14 accents) can be applied to news pages and to the app.
+- **Reading themes.** Optional [Catppuccin](https://github.com/catppuccin/catppuccin) palettes (Latte, Frappé, Macchiato, Mocha, with 14 accents) can be applied to news pages and to the app. Pages are themed before they paint, including cookie banners, paywall dialogs and embedded charts.
 - **Learns what you read, gently.** Opens and 👍/👎 nudge your briefings. The effect is bounded, every boost is shown with its reason, and you can reset it.
 - **Custom sources.** Add any news site from Settings with a name and a URL.
 
@@ -34,6 +34,8 @@ npm run pack         # builds release/mac-arm64/News Monitor.app
 ```
 
 Copy `News Monitor.app` to `/Applications` and open it. The build is ad-hoc signed, so the first launch may need right-click → **Open**. Run from `/Applications`, it registers itself to start at login.
+
+**Optional, recommended:** create a self-signed code-signing certificate named *News Monitor Local Signing* (Keychain Access → Certificate Assistant → Create a Certificate…, type *Code Signing*). `npm run pack` signs with it when it exists. macOS then recognizes each new build as the same app and keeps its Keychain access, instead of asking again after every update.
 
 To run from source without packaging, use `npm start`.
 
@@ -90,6 +92,15 @@ Topics come from the article's URL section (`/economy/`, `/business/`, `/tech/`)
 Each story has a few features: its topic, its source, and some distinctive headline words. Opening a story counts for those features, 👍 counts three times as much, and 👎 counts against them. Stories you scroll past in a briefing count slightly against. Evidence fades with a 30-day half-life. Affinity is shrunk toward zero until there's enough evidence, so a single click barely registers. The final boost is capped at ±1.5 points, and the "Why?" panel shows its reason ("you often read Markets stories").
 
 By default this only reorders briefings. You can let it nudge alerts too, by at most ±0.75 points. The model is a small JSON file in the app's data folder. **Settings → Personalization → Reset** clears it.
+
+### Reading themes
+
+News pages are recolored by [Dark Reader](https://github.com/darkreader/darkreader)'s dynamic engine, loaded as a preload script. It starts in every frame of a tab before the first paint, so there's no white flash and iframes are themed too. Stylesheets served from other domains, which the page itself isn't allowed to read, are fetched by the main process. Only public `http(s)` URLs returning CSS or images are allowed. Hidden check windows are never themed.
+
+Two adjustments make news sites look right:
+
+- **Paper tints become the theme background.** Light backgrounds with very little color, such as the FT's salmon paper or cream panels, are treated as neutral. Otherwise Dark Reader keeps their hue and they turn brown.
+- **Per-site fixes.** These come from Dark Reader's community list (`assets/theme-fixes.json`, refreshed with `node scripts/update-theme-fixes.js`), plus a few of our own in `theme.ts`, such as the FT and Barron's mastheads.
 
 ## Battery and memory
 
@@ -167,10 +178,14 @@ src/renderer/      the interface (plain TypeScript, no framework)
 
 - The app's own windows are sandboxed, use context isolation and a strict Content Security Policy, and can't navigate.
 - The interface reaches the main process through a short list of IPC calls. Each call checks its sender and validates its arguments.
-- News pages run sandboxed with no preload of ours. Their permission requests (camera, location, notifications, …) are denied.
+- News pages run sandboxed. The only preloads in their frames are the ad blocker's and the theme's, both in an isolated world. Permission requests (camera, location, notifications, …) are denied.
 - The extractor runs in an isolated JavaScript world, so a page can't tamper with it.
 - Links only open in your browser if they are `http(s)`.
-- The packaged app disables Electron's `RunAsNode`, `NODE_OPTIONS` and inspector fuses.
+- **Your sign-ins are encrypted at rest.** Cookies are encrypted with a key kept in the macOS Keychain, so another program can't lift your sessions by copying the app's files. Cookies saved by older versions are re-encrypted once, and the plain-text copies are then removed from disk.
+- **No debugging backdoor.** The packaged app refuses to start with `--remote-debugging-port` or `--inspect`, and the `RunAsNode`, `NODE_OPTIONS` and inspector fuses are off. The app's code is integrity-checked at launch (asar integrity fuse).
+- **Phishing-resistant sign-in.** Publisher sign-in happens inside the source's tab, whose real host is always shown in the toolbar (with "Not secure" on plain HTTP). Popups open only for Google, Apple, Facebook and Microsoft sign-in, and their title bar always shows the real host. Blank windows, which a page could fill with a fake form, never open.
+- New sign-ins are written to disk within seconds and again before quitting, so a crash doesn't sign you out.
+- Cookies are never logged, sent anywhere, or read by the app outside Chromium's own cookie store.
 
 ## License
 

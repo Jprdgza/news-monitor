@@ -1,9 +1,15 @@
 // Reading themes: Catppuccin palettes applied to news pages with Dark Reader's dynamic
 // theme engine, and to the app's own interface. Off by default.
+//
+// Pages are themed by a preload script (themePreload.ts) that runs in every frame of a tab
+// before the page paints. This file answers its questions over IPC: which theme to use, the
+// per-site fixes, and fetching cross-origin stylesheets it isn't allowed to read itself.
 // Palette values: https://github.com/catppuccin/palette (MIT).
 import fs from 'node:fs';
-import type { WebContents } from 'electron';
-import type { Config } from './configCore';
+import path from 'node:path';
+import { ipcMain, type WebContents } from 'electron';
+import { isPublicHttpUrl, type Config } from './configCore';
+import { getConfig } from './config';
 import { log } from './log';
 
 export type Flavor = 'latte' | 'frappe' | 'macchiato' | 'mocha';
@@ -77,48 +83,145 @@ export function themedFor(cfg: Config, sourceId: string): boolean {
   return cfg.theme.perSource[sourceId] ?? cfg.theme.enabled;
 }
 
-let darkReaderSource: string | null = null;
-function darkReader(): string {
-  if (darkReaderSource === null) {
-    try {
-      darkReaderSource = fs.readFileSync(require.resolve('darkreader/darkreader.js'), 'utf8');
-    } catch (err) {
-      log.warn(`Dark Reader not available: ${err}`);
-      darkReaderSource = '';
-    }
-  }
-  return darkReaderSource;
+/** Path of the bundled preload (Dark Reader + themePreload.ts), built by scripts/copy-assets.js. */
+export const THEME_PRELOAD = path.join(__dirname, 'theme-preload.js');
+
+interface Fix {
+  url: string[];
+  invert: string[];
+  css: string;
+  ignoreInlineStyle: string[];
+  ignoreImageAnalysis: string[];
 }
 
-// Run in an isolated JavaScript world: Dark Reader shares the page's DOM but not its globals.
-const WORLD_ID = 1077;
-
-/** Apply (or remove) the reading theme on a page. Call on every dom-ready. */
-export async function applyPageTheme(wc: WebContents, cfg: Config, on: boolean) {
-  if (wc.isDestroyed()) return;
-  const src = darkReader();
-  if (!src) return;
-  const p = palette(cfg);
-  const theme = {
-    mode: p.dark ? 1 : 0,
-    brightness: 100,
-    contrast: 100,
-    sepia: 0,
-    darkSchemeBackgroundColor: p.bg,
-    darkSchemeTextColor: p.text,
-    lightSchemeBackgroundColor: p.bg,
-    lightSchemeTextColor: p.text,
-    selectionColor: p.accent,
-    scrollbarColor: p.surface2,
-  };
-  const code = on
-    ? `if (typeof DarkReader === 'undefined') { ${src}
-       }
-       ;(function(){ try { DarkReader.setFetchMethod(window.fetch); DarkReader.enable(${JSON.stringify(theme)}, { css: 'a:hover{color:${p.accent} !important} ::selection{background:${p.accent}55 !important}' }); } catch (e) {} })();`
-    : `(function(){ try { if (typeof DarkReader !== 'undefined') DarkReader.disable(); } catch (e) {} })();`;
-  try {
-    await wc.executeJavaScriptInIsolatedWorld(WORLD_ID, [{ code }]);
-  } catch (err) {
-    log.warn(`Theme injection failed: ${err}`);
+// Dark Reader's community fixes for the built-in sources (scripts/update-theme-fixes.js).
+let fixList: Fix[] | null = null;
+function fixes(): Fix[] {
+  if (fixList === null) {
+    try {
+      fixList = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'assets', 'theme-fixes.json'), 'utf8'));
+    } catch (err) {
+      log.warn(`Theme fixes not available: ${err}`);
+      fixList = [];
+    }
   }
+  return fixList!;
+}
+
+// Our own fixes for sites Dark Reader's list doesn't cover well (checked with screenshots).
+const OWN_FIXES: Fix[] = [
+  {
+    url: ['ft.com'],
+    // The masthead wordmark is a dark inline SVG (and a tinted image at smaller widths).
+    invert: ['.o-header__top-logo svg', '.o-header__top-logo.o-header__hide--L', '.o-header__drawer-logo svg'],
+    css: '',
+    ignoreInlineStyle: [],
+    ignoreImageAnalysis: [],
+  },
+  {
+    url: ['barrons.com'],
+    // The wordmark is a dark image (data URI).
+    invert: ['h1[class*="Logo-module_container"] img'],
+    css: '',
+    ignoreInlineStyle: [],
+    ignoreImageAnalysis: [],
+  },
+];
+
+const hostOf = (url: string) => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return '';
+  }
+};
+
+const matches = (pattern: string, host: string) => {
+  const p = pattern.replace(/^\*\./, '').replace(/\/.*$/, '');
+  return !!host && (host === p || host.endsWith('.' + p));
+};
+
+/** Our own touch-ups, applied on top of Dark Reader on every site. */
+function extraCss(p: Palette): string {
+  return [
+    `::selection { background-color: ${p.accent}55 !important; }`,
+    `a:hover { color: ${p.accent} !important; }`,
+  ].join('\n');
+}
+
+/** The generic fix merged with the fix for this frame's site, as Dark Reader's extension does. */
+export function fixFor(frameUrl: string, p: Palette) {
+  const host = hostOf(frameUrl);
+  const parts = [...fixes(), ...OWN_FIXES].filter((f) => f.url.includes('*') || f.url.some((u) => matches(u, host)));
+  return {
+    url: [host || '*'],
+    invert: parts.flatMap((f) => f.invert),
+    css: [...parts.map((f) => f.css), extraCss(p)].filter(Boolean).join('\n'),
+    ignoreInlineStyle: parts.flatMap((f) => f.ignoreInlineStyle),
+    ignoreImageAnalysis: parts.flatMap((f) => f.ignoreImageAnalysis),
+    disableStyleSheetsProxy: false,
+  };
+}
+
+/** What a frame of this source's tab should do. */
+export function themePayload(cfg: Config, sourceId: string, frameUrl: string) {
+  const p = palette(cfg);
+  if (!themedFor(cfg, sourceId)) return { on: false, theme: {}, fixes: null };
+  return {
+    on: true,
+    theme: {
+      mode: p.dark ? 1 : 0,
+      brightness: 100,
+      contrast: 100,
+      sepia: 0,
+      grayscale: 0,
+      darkSchemeBackgroundColor: p.bg,
+      darkSchemeTextColor: p.text,
+      lightSchemeBackgroundColor: p.bg,
+      lightSchemeTextColor: p.text,
+      selectionColor: 'auto',
+      scrollbarColor: p.surface2,
+    },
+    fixes: fixFor(frameUrl, p),
+  };
+}
+
+/** Send the current theme to every frame of a tab (after the settings change). */
+export function pushTheme(wc: WebContents, cfg: Config, sourceId: string) {
+  if (wc.isDestroyed()) return;
+  for (const frame of wc.mainFrame.framesInSubtree) {
+    try {
+      frame.send('nm-theme:update', themePayload(cfg, sourceId, frame.url));
+    } catch {
+      /* frame went away */
+    }
+  }
+}
+
+const FETCH_TYPES = /^(text\/css|image\/)/i;
+const FETCH_MAX_BYTES = 5 * 1024 * 1024;
+
+/**
+ * Answer the preload's questions. `sourceOf` maps a WebContents to the source whose visible tab
+ * it is (or undefined for anything else, e.g. hidden check windows, which are never themed).
+ */
+export function registerThemeIpc(sourceOf: (wc: WebContents) => string | undefined) {
+  ipcMain.on('nm-theme:get', (e) => {
+    const id = sourceOf(e.sender);
+    e.returnValue = id ? themePayload(getConfig(), id, e.senderFrame?.url || e.sender.getURL()) : null;
+  });
+  ipcMain.handle('nm-theme:fetch', async (e, url: unknown) => {
+    const id = sourceOf(e.sender);
+    if (!id || typeof url !== 'string' || url.length > 4000 || !isPublicHttpUrl(url) || !themedFor(getConfig(), id)) return null;
+    try {
+      const res = await e.sender.session.fetch(url, { signal: AbortSignal.timeout(15_000), credentials: 'omit' });
+      const type = res.headers.get('content-type') || '';
+      if (!res.ok || !FETCH_TYPES.test(type) || Number(res.headers.get('content-length') || 0) > FETCH_MAX_BYTES) return null;
+      const buf = await res.arrayBuffer();
+      if (buf.byteLength > FETCH_MAX_BYTES) return null;
+      return { type, body: new Uint8Array(buf) };
+    } catch {
+      return null;
+    }
+  });
 }

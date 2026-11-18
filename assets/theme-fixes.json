@@ -1,0 +1,132 @@
+[
+ {
+  "url": [
+   "*"
+  ],
+  "invert": [
+   "c-wiz div > svg > circle",
+   ".jfk-bubble.gtx-bubble",
+   ".captcheck_answer_label > input + img",
+   "span#closed_text > img[src^=\"https://www.gstatic.com/images/branding/googlelogo\"]",
+   "span[data-href^=\"https://www.hcaptcha.com/\"] > #icon",
+   "img.Wirisformula",
+   "a[data-testid=\"headerMediumLogo\"]>svg",
+   ".d2l-navigation-link-image-container",
+   ".d2l-iframe-loading-container",
+   "div.mc-ip-hide[style*=\"background: rgb(255, 255, 255) !important\"]",
+   "[style*=\"color: rgb(0, 0, 1) !important;\"]"
+  ],
+  "css": "c-wiz div {\n    --action-items-action-item-background-color: var(--darkreader-neutral-background) !important;\n}\n.jfk-bubble.gtx-bubble {\n    background-color: white !important;\n}\n.vimvixen-hint {\n    background-color: ${#ffd76e} !important;\n    border-color: ${#c59d00} !important;\n    color: ${#302505} !important;\n}\n#vimvixen-console-frame {\n    color-scheme: light !important;\n}\n::placeholder {\n    opacity: 0.5 !important;\n}\n#edge-translate-panel-body,\n.MuiTypography-body1,\n.nfe-quote-text {\n    color: var(--darkreader-neutral-text) !important;\n}\ngr-main-header {\n    background-color: ${lightblue} !important;\n}\n.tou-z65h9k,\n.tou-mignzq,\n.tou-1b6i2ox,\n.tou-lnqlqk {\n    background-color: var(--darkreader-neutral-background) !important;\n}\n.tou-75mvi {\n    background-color: ${rgb(207, 236, 245)} !important;\n}\n.tou-ta9e87,\n.tou-1w3fhi0,\n.tou-1b8t2us,\n.tou-py7lfi,\n.tou-1lpmd9d,\n.tou-1frrtv8,\n.tou-17ezmgn {\n    background-color: ${rgb(245, 245, 245)} !important;\n}\n.tou-uknfeu {\n    background-color: ${rgb(250, 237, 218)} !important;\n}\n.tou-6i3zyv {\n    background-color: ${rgb(133, 195, 216)} !important;\n}\ndiv.mermaid-viewer-control-panel .btn {\n    background-color: var(--darkreader-neutral-background);\n    fill: var(--darkreader-neutral-text);\n}\nsvg g rect.er {\n    fill: var(--darkreader-neutral-background) !important;\n}\nsvg g rect.er.entityBox {\n    fill: var(--darkreader-neutral-background) !important;\n}\nsvg g rect.er.attributeBoxOdd {\n    fill: var(--darkreader-neutral-background) !important;\n}\nsvg g rect.er.attributeBoxEven {\n    fill: var(--darkreader-selection-background);\n    fill-opacity: 0.8 !important;\n}\nsvg rect.er.relationshipLabelBox {\n    fill: var(--darkreader-neutral-background) !important;\n}\nsvg g g.nodes rect,\nsvg g g.nodes polygon {\n    fill: var(--darkreader-neutral-background) !important;\n}\nsvg g rect.task {\n    fill: var(--darkreader-selection-background) !important;\n}\nsvg line.messageLine0,\nsvg line.messageLine1 {\n    stroke: var(--darkreader-neutral-text) !important;\n}\ndiv.mermaid .actor {\n    fill: var(--darkreader-neutral-background) !important;\n}\nmitid-authenticators-code-app > .code-app-container {\n    background-color: white !important;\n    padding-top: 1rem;\n}\niframe#unpaywall[src$=\"unpaywall.html\"] {\n    color-scheme: light !important;\n}\nselect {\n    --darkreader-bg--form-control-background-color: rgba(22, 22, 22, 0) !important;\n}\nbody#tumblr {\n    --darkreader-bg--secondary-accent: 31, 32, 34 !important;\n    --darkreader-bg--white: 23, 23, 23 !important;\n    --darkreader-text--black: 228, 224, 218 !important;\n}\n:host {\n    --d2l-border-color: var(--darkreader-bg--d2l-color-gypsum) !important;\n    --d2l-button-icon-background-color-hover: var(--darkreader-bg--d2l-color-gypsum) !important;\n    --d2l-color-ferrite: var(--darkreader-neutral-text) !important;\n    --d2l-color-sylvite: var(--darkreader-bg--d2l-color-sylvite) !important;\n    --d2l-dropdown-background-color: var(--darkreader-neutral-background) !important;\n    --d2l-dropdown-border-color: var(--darkreader-border--d2l-color-mica) !important;\n    --d2l-input-backgroud-color: var(--darkreader-neutral-background) !important;\n    --d2l-menu-border-color: var(--darkreader-bg--d2l-color-gypsum) !important;\n    --d2l-tooltip-background-color: var(--darkreader-neutral-background) !important;\n    --d2l-tooltip-border-color: var(--darkreader-bg--d2l-color-gypsum) !important;\n}\n:host([_floating]) .d2l-floating-buttons-container {\n    background-color: var(--darkreader-neutral-background) !important;\n    border-top-color: var(--darkreader-border--d2l-color-mica) !important;\n    opacity: 0.88 !important;\n}\nd2l-card {\n    background: var(--darkreader-neutral-background) !important;\n    border-color: var(--darkreader-border--d2l-color-gypsum) !important;\n}\nd2l-dropdown-content > div,\nd2l-menu-item {\n    background-color: var(--darkreader-neutral-background) !important;\n    border-radius: 10px !important;\n}\nd2l-empty-state-simple {\n    border-color: var(--darkreader-bg--d2l-color-gypsum) !important;\n}\n.d2l-button-filter > ul > li > a.vui-button {\n    border-color: var(--darkreader-border--d2l-color-mica) !important;\n}\n.d2l-label-text:has(.d2l-button-subtle-content):hover,\n.d2l-label-text:has(.d2l-button-subtle-content):focus,\n.d2l-label-text:has(.d2l-button-subtle-content):active {\n    background-color: var(--darkreader-bg--d2l-color-gypsum) !important;\n}\n.d2l-navigation-centerer {\n    color: inherit !important;\n}\n.d2l-tabs-layout {\n    border-color: var(--darkreader-border--d2l-color-gypsum) !important;\n}\n.d2l-input,\n.d2l-calendar-date,\n.d2l-htmleditor-container {\n    background-color: var(--darkreader-neutral-background) !important;\n}\n.d2l-collapsible-panel {\n    border: 1px solid var(--darkreader-border--d2l-color-mica) !important;\n    border-radius: 0.4rem !important;\n}\n.d2l-collapsible-panel-divider {\n    border-bottom: 1px solid var(--darkreader-border--d2l-color-mica) !important;\n}\n.d2l-w2d-flex {\n    border-bottom: 2px solid var(--darkreader-border--d2l-color-mica) !important;\n}\n.d2l-collapsible-panel scrolled,\n.d2l-collapsible-panel-header,\n.d2l-w2d-collection-fixed {\n    background-color: var(--darkreader-neutral-background) !important;\n}\n.d2l-loading-spinner-bg {\n    fill: var(--darkreader-bg--d2l-color-gypsum) !important;\n}\n.d2l-loading-spinner-bg-stroke {\n    stroke: var(--darkreader-border--d2l-color-mica) !important;\n}\n.d2l-loading-spinner-wrapper svg path,\n.d2l-loading-spinner-wrapper svg circle {\n    fill: var(--darkreader-neutral-background) !important;\n}\n.d2l-twopanelselector-side.d2l-twopanelselector-side-sep {\n    background: var(--darkreader-bg--d2l-color-mica) !important;\n}\n.d2l-le-TreeAccordionItem-anchor::before {\n    background: var(--darkreader-bg--d2l-color-corundum) !important;\n}\ntable[class|=\"moz-header\"] {\n    background: none;\n}\n*[style*=\"color: rgba(0,0,0,\"]:not([style*=\"color: rgba(0,0,0,0)\"]),\n*[style*=\"color: rgba(0, 0, 0,\"]:not([style*=\"color: rgba(0, 0, 0, 0)\"]),\n*[style*=\"color:#000\"]:not(.cell-input > span),\n*[style*=\"color:black\"]:not(.cell-input > span),\n*[style*=\"color:#282828\"]:not(.cell-input > span),\n*[style*=\"color:#444\"]:not(.cell-input > span),\n*[style*=\"color: #222222\"]:not(.cell-input > span) {\n    color: var(--darkreader-neutral-text) !important;\n}\n*[style*=\"background:#fff\"],\n*[style*=\"background-color:#fff\"],\n*[style*=\"background: #fff\"],\n*[style*=\"background: rgb(255, 255, 255)\"] {\n    background: var(--darkreader-neutral-background) !important;\n}\n*[bgcolor=\"#F5F5F5\"],\n*[style*=\"background-color: #F5F5F5\"] {\n    background: ${#F5F5F5} !important;\n}\n*[style*=\"background: #e6e6e6\"] {\n    background: ${#e6e6e6} !important;\n}\nbody[style*=\"background: rgb(255, 255, 255) !important\"] *:not(a),\n.body[style*=\"background-color: rgb(254, 254, 254) !important\"] *:not(a) {\n    background-color: var(--darkreader-neutral-background) !important;\n}\ndiv[style*=\"www.gstatic.com/android/\"] {\n    background: none !important;\n}\n*[style*=\"background:#f9f9f9\"] {\n    background: ${#F9F9F9} !important;\n}\nbody.mediawiki.skin-vector #mw-page-base {\n    background-image: none !important;\n}\n.overflow-hidden .spinning-bg,\n.overflow-hidden .solid-bg {\n    background: transparent !important;\n}\n*[style*=\"color: rgb(0,0,0) !imoprtant\"][style*=\"--darkreader-inline-color\"],\n*[style*=\"color: rgb(0, 0, 0) !important\"][style*=\"--darkreader-inline-color\"] {\n    -webkit-text-fill-color: var(--darkreader-inline-color) !important;\n}\n[class*=\"v-col--cols\"] {\n    --v-col-is-grow:  !important;\n}\n.border-b {\n    border-bottom-style: var(--tw-border-style) !important;\n}\ntd[background=\"https://services.google.com/fh/files/emails/bg_grey.png\"] {\n    background-image: none !important;\n}",
+  "ignoreInlineStyle": [],
+  "ignoreImageAnalysis": []
+ },
+ {
+  "url": [
+   "apnews.com"
+  ],
+  "invert": [
+   ".hamburger-box",
+   ".sticky-part > div svg",
+   ".LeftRail > div svg",
+   ".Banner",
+   ".Banner-link"
+  ],
+  "css": "",
+  "ignoreInlineStyle": [],
+  "ignoreImageAnalysis": []
+ },
+ {
+  "url": [
+   "axios.com"
+  ],
+  "invert": [
+   "a[data-cy=\"axios-logo-main\"]"
+  ],
+  "css": "",
+  "ignoreInlineStyle": [],
+  "ignoreImageAnalysis": []
+ },
+ {
+  "url": [
+   "bloomberg.com"
+  ],
+  "invert": [
+   ".navi-bar__button-icon",
+   ".navi-sections__item--LiveNow::before",
+   ".navi-sections__link--current::after"
+  ],
+  "css": ".navi {\n    border-color: var(--darkreader-border--color-black) !important;\n}",
+  "ignoreInlineStyle": [],
+  "ignoreImageAnalysis": []
+ },
+ {
+  "url": [
+   "cnbc.com"
+  ],
+  "invert": [
+   ".RenderKeyPoints-list li::before",
+   ".WatchLiveRightRail-logo"
+  ],
+  "css": "div[class^=\"FeaturedStories-styles-makeit-background\"]::before {\n    opacity: 0.1 !important;\n}",
+  "ignoreInlineStyle": [
+   "svg.ProPill-proPill *"
+  ],
+  "ignoreImageAnalysis": []
+ },
+ {
+  "url": [
+   "economist.com"
+  ],
+  "invert": [
+   "#ds-wordmark-1843 path:nth-child(5)"
+  ],
+  "css": ".css-1xqo7ld {\n    color: transparent;\n}",
+  "ignoreInlineStyle": [
+   "#ds-economist-logo > path",
+   ".ds-share-link > svg > g > circle"
+  ],
+  "ignoreImageAnalysis": []
+ },
+ {
+  "url": [
+   "nytimes.com"
+  ],
+  "invert": [
+   "button[aria-label=\"Listen to article\"] path[stroke=\"#DFDFDF\"]",
+   "div[data-testid=\"masthead-desktop-logo\"] > a > svg",
+   "div#live-country-map.live-country-map-embed",
+   "div#live-us-map.live-us-map-embed",
+   ".needle-wrap > svg",
+   ".svelte-1v1dl99",
+   ".vmap-layer-container > g > text",
+   ".vmap-zoom-buttons",
+   "#xwd-board",
+   ".pz-nav__logo > path",
+   ".pz-nav__hamburger-box",
+   "div.Domino-module_dotsWrapper__fkTri",
+   ".cell-letter",
+   ".sb-input-invalid",
+   "button span[class^=\"_icon_\"]"
+  ],
+  "css": ".letter.filled.remaining {\n    background-color: var(--darkreader-bg--spelling-bee-light-yellow) !important;\n}\npolygon.cell-fill {\n    stroke: var(--darkreader-bg--stroke) !important;\n}\nbutton[aria-label=\"Listen to article\"] path[d=\"M22 38L37 28L22 18V38Z\"],\nbutton[aria-label=\"Save article for reading later...\"] .saved-stroke,\nsvg:has(circle) path {\n    fill: var(--darkreader-neutral-text) !important;\n}\n.css-oylsik,\n.css-nhjhh0 svg,\n.css-18z7m18 svg,\n.css-1q2j1fr svg,\na[data-testid] > svg {\n    fill: ${black} !important;\n}\n.headline-link div {\n    color: ${black} !important;\n}\n.headline-link div:hover {\n    color: ${#555} !important;\n}\n.pz-nav__logo > rect {\n    fill: var(--darkreader-bg--bg-page);\n}\n.svelte-15nnlbj {\n    font-weight: bold !important;\n}\n#xwd-board rect[class^=\"Cell-block--\"] {\n    fill: ${black} !important;\n}\n#xwd-board text[class^=\"Cell-hidden--\"] {\n    color: ${black} !important;\n}\n#xwd-board rect[class^=\"Cell-cell--\"] {\n    fill: ${darkgrey} !important;\n}\n#xwd-board rect[class^=\"Cell-highlighted--\"] {\n    fill: ${lightgrey} !important;\n}\n#xwd-board rect[class^=\"Cell-selected--\"] {\n    fill: ${white} !important;\n}\n#xwd-board rect[class^=\"Cell-related--\"] {\n    fill: ${goldenrod} !important;\n}\n#xwd-board rect[class^=\"xwd__cell--cell\"] {\n    fill: ${darkgrey} !important;\n}\n#xwd-board rect[class^=\"xwd__cell--highlighted\"] {\n    fill: ${lightgrey} !important;\n}\n#xwd-board rect[class^=\"xwd__cell--selected\"] {\n    fill: ${white} !important;\n}\n#xwd-board rect[class^=\"xwd__cell--related\"] {\n    fill: ${khaki} !important;\n}\n#xwd-board rect[class*=\"xwd__cell--penciled\"] ~ text[text-anchor^=\"middle\"] {\n    fill: ${blue} !important;\n}\nhtml[data-darkreader-scheme=\"dark\"] [class*=SolvedCategory-module_solvedCategory][data-level=\"0\"] {\n    background-color: rgb(153, 140, 41) !important;\n}\nhtml[data-darkreader-scheme=\"dark\"] [class*=SolvedCategory-module_solvedCategory][data-level=\"1\"] {\n    background-color: rgb(82, 133, 40) !important;\n}\nhtml[data-darkreader-scheme=\"dark\"] [class*=SolvedCategory-module_solvedCategory][data-level=\"2\"] {\n    background-color: rgb(60, 116, 144) !important;\n}\nhtml[data-darkreader-scheme=\"dimmed\"] [class*=SolvedCategory-module_solvedCategory][data-level=\"2\"] {\n    background-color: var(--bg-connections-medium) !important;\n}\nhtml[data-darkreader-scheme=\"dark\"] [class*=SolvedCategory-module_solvedCategory][data-level=\"3\"] {\n    background-color: rgb(120, 58, 133) !important;\n}\n[class*=Card-module_label] {\n    background-color: ${#dbdbdb} !important;\n}\n[class*=Card-module_label][class*=Card-module_selected] {\n    background-color: #404040 !important;\n}\n:root {\n    --darkreader-border--tpl-color-stroke-primary: ${#121212} !important;\n    --darkreader-border--tpl-color-stroke-tertiary: var(--color-stroke-tertiary) !important;\n}",
+  "ignoreInlineStyle": [
+   "line[style=\"stroke: var(--tie); stroke: black;\"]"
+  ],
+  "ignoreImageAnalysis": []
+ },
+ {
+  "url": [
+   "reuters.com"
+  ],
+  "invert": [
+   "path[d^=\"M121.865 50.29c0\"]",
+   "span[data-testid=\"ReutersLogo\"]:not([class^=\"mobile-menu-module__logo\"])",
+   "svg[data-testid=\"IconSearch\"]",
+   "svg[aria-labelledby=\"EmailIconId\"]",
+   "svg[data-testid=\"IconClose\"]"
+  ],
+  "css": "",
+  "ignoreInlineStyle": [],
+  "ignoreImageAnalysis": []
+ }
+]

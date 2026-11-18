@@ -11,7 +11,7 @@
     "dry-run": "npm run build && electron . --dry-run --once",
     "debug": "npm run build && electron . --dry-run",
     "icons": "electron scripts/make-icons.js",
-    "pack": "npm run build && electron-builder --mac --dir",
+    "pack": "npm run build && electron-builder --mac --dir && node scripts/sign-local.js",
     "dist": "npm run build && electron-builder --mac",
     "setup": "npm install && node node_modules/electron/install.js",
     "test": "npm run build && node --test test/",
@@ -31,7 +31,7 @@
     ],
     "mac": {
       "category": "public.app-category.news",
-      "icon": "assets/icon.png",
+      "icon": "assets/AppIcon.icon",
       "target": [
         "dir"
       ],
@@ -46,7 +46,8 @@
       "enableNodeOptionsEnvironmentVariable": false,
       "enableNodeCliInspectArguments": false,
       "onlyLoadAppFromAsar": true,
-      "enableCookieEncryption": false
+      "enableCookieEncryption": true,
+      "enableEmbeddedAsarIntegrityValidation": true
     }
   },
   "devDependencies": {

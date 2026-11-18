@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const dist = (m) => require(path.join(__dirname, '..', 'dist', 'main', m));
-const { sanitizeConfig, isHttpUrl } = dist('configCore.js');
+const { sanitizeConfig, isHttpUrl, isPublicHttpUrl } = dist('configCore.js');
 const { tokens, Idf, similarity, normalizeUrl } = dist('match.js');
 const scoring = dist('scoring.js');
 const { classify } = dist('topics.js');
@@ -295,4 +295,30 @@ test('matching handles hostile or empty text', () => {
   }
   const idf = new Idf([]);
   assert.equal(idf.cosine(new Set(), new Set()).score, 0);
+});
+
+// ---------- theme ----------
+test('theme stylesheet proxy only accepts public http(s) URLs', () => {
+  for (const ok of ['https://static.politico.com/a.css', 'http://cdn.example.co.uk/x.png', 'https://8.8.8.8/a.css']) assert.ok(isPublicHttpUrl(ok), ok);
+  for (const bad of [
+    'file:///etc/passwd', 'javascript:alert(1)', 'data:text/css,x', 'https://localhost/a.css', 'http://127.0.0.1:8080/', 'http://10.0.0.5/a.css',
+    'http://192.168.1.1/', 'http://172.20.0.1/', 'http://169.254.169.254/latest/meta-data', 'http://[::1]/', 'https://printer.local/',
+    'https://user:pw@example.com/a.css', 'http://intranet/', 'not a url',
+  ]) assert.ok(!isPublicHttpUrl(bad), bad);
+});
+
+test('Dark Reader bundle keeps the paper-tint patch', () => {
+  const bundle = fs.readFileSync(path.join(__dirname, '..', 'dist', 'main', 'theme-preload.js'), 'utf8');
+  assert.equal(bundle.split('s * (1 - Math.abs(2 * l - 1)) < 0.16').length - 1, 2);
+  assert.ok(bundle.includes("ipcRenderer.sendSync('nm-theme:get')"));
+});
+
+// ---------- login safety ----------
+test('only real identity providers may open sign-in popups', () => {
+  const { isIdentityProvider } = dist('security.js');
+  for (const ok of ['https://accounts.google.com/o/oauth2/auth?x=1', 'https://appleid.apple.com/auth/authorize']) assert.ok(isIdentityProvider(ok), ok);
+  for (const bad of [
+    'https://login.attacker.com/', 'https://accounts.google.com.evil.io/', 'http://accounts.google.com/', 'about:blank', '',
+    'https://evil-auth.com/', 'https://sso.fake-wsj.com/', 'javascript:alert(1)',
+  ]) assert.ok(!isIdentityProvider(bad), bad);
 });
