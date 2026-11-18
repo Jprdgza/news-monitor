@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:" />
+    <title>News Monitor</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Top bar over the browsing area: source tabs + navigation. Pages are native views drawn below it. -->
+    <header id="topbar">
+      <div class="traffic-light-space"></div>
+      <nav id="tabs" aria-label="Sources"></nav>
+      <div class="nav" id="nav"></div>
+      <div id="host" class="host"></div>
+      <div id="onboarding" class="onboarding" hidden>
+        <span id="onboarding-text">Sign in to your subscriptions in their tabs.</span>
+        <button id="dismiss-onboarding" class="pill">Done</button>
+      </div>
+    </header>
+
+    <div id="empty-tabs" class="empty-browser" hidden>
+      <p>No sources are turned on.</p>
+      <p class="hint">Open Settings → Sources to pick some.</p>
+    </div>
+
+    <!-- Right sidebar: briefing, alerts and settings. -->
+    <aside id="sidebar">
+      <div class="side-head">
+        <div class="side-title">
+          <h1 id="side-title">Briefing</h1>
+          <span id="side-sub" class="sub"></span>
+        </div>
+        <div class="side-tools">
+          <button id="run-now" class="icon-btn" title="Check front pages now"></button>
+          <button id="bell" class="icon-btn" title="Alerts"><span id="badge" class="badge" hidden></span></button>
+          <button id="gear" class="icon-btn" title="Settings"></button>
+        </div>
+      </div>
+      <div id="modes" class="segmented" role="tablist">
+        <button data-mode="day" class="active" role="tab">Today</button>
+        <button data-mode="whatsnew" role="tab">What's new</button>
+        <button data-mode="morning" role="tab">Morning</button>
+      </div>
+      <div id="day-nav" class="day-nav">
+        <button id="prev-day" class="icon-btn small" title="Previous day"></button>
+        <span id="day-label"></span>
+        <button id="next-day" class="icon-btn small" title="Next day"></button>
+      </div>
+      <div id="filters" class="filters"></div>
+      <div id="list-caption" class="caption"></div>
+      <div id="list" class="list"></div>
+      <form id="settings" class="settings" hidden></form>
+    </aside>
+
+    <footer id="statusbar">
+      <span id="st-check" class="st"></span>
+      <span id="st-sources" class="st-sources"></span>
+      <span class="spacer"></span>
+      <span id="st-warn" class="st warn"></span>
+      <span id="st-power" class="st"></span>
+      <span id="st-dry" class="st warn"></span>
+    </footer>
+
+    <script src="common.js"></script>
+    <script src="renderer.js"></script>
+  </body>
+</html>

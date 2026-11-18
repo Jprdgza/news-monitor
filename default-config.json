@@ -1,0 +1,90 @@
+{
+  "version": 2,
+  "alertThreshold": 6,
+  "overnightThresholdMultiplier": 1.5,
+  "maxAlertsPerDay": 6,
+  "followUpExtraScore": 2.5,
+  "dryRun": false,
+  "sources": {
+    "enabled": ["wsj", "nyt", "ft", "bloomberg", "reuters"],
+    "custom": []
+  },
+  "polling": {
+    "timezone": "",
+    "dayStartHour": 6,
+    "dayEndHour": 23,
+    "dayIntervalMinutes": 10,
+    "dayJitterMinutes": 2,
+    "nightIntervalMinutes": 30,
+    "nightJitterMinutes": 5
+  },
+  "efficiency": {
+    "blockAds": true,
+    "unloadTabsAfterMinutes": 2,
+    "batteryIntervalMultiplier": 1.5,
+    "slowerWhenLocked": true,
+    "loadImagesInChecks": false
+  },
+  "digest": {
+    "morningStartHour": 18,
+    "topCount": 5,
+    "macroCount": 5,
+    "microCount": 5,
+    "radarCount": 3,
+    "diversity": 0.7
+  },
+  "theme": {
+    "enabled": false,
+    "flavor": "mocha",
+    "accent": "mauve",
+    "background": "",
+    "text": "",
+    "themeApp": true,
+    "perSource": {}
+  },
+  "personalization": {
+    "enabled": true,
+    "affectAlerts": false
+  },
+  "weights": {
+    "leadStory": 4,
+    "topSlot": 2.5,
+    "topSlotCount": 3,
+    "coverageFirst": 2.5,
+    "coverageEach": 1.5,
+    "coverageMax": 6,
+    "topOnMultiple": 2,
+    "liveOrBreaking": 2.5,
+    "breaking": 3,
+    "liveMaxAgeHours": 6,
+    "freshAtTop": 1,
+    "persistence": 1,
+    "persistenceChecks": 3,
+    "keywordPerCategory": 1,
+    "keywordMax": 2,
+    "opinionMultiplier": 0.4,
+    "shortHeadlinePenalty": 2,
+    "questionPenalty": 1.5,
+    "routineLivePenalty": 2.5
+  },
+  "matching": {
+    "sameStorySimilarity": 0.5,
+    "clusterSimilarity": 0.25,
+    "clusterMinSharedWords": 3,
+    "clusterWindowHours": 18,
+    "alertDedupeHours": 36
+  },
+  "previews": {
+    "enabled": true,
+    "maxPerCheck": 3,
+    "secondsBetween": 4
+  },
+  "minHeadlinesBeforeFallback": 8,
+  "keywords": {
+    "markets": ["Fed", "FOMC", "rate cut", "rate hike", "Powell", "inflation", "CPI", "jobs report", "recession", "selloff", "sell-off", "plunge", "crash", "rally", "S&P", "Nasdaq", "Treasury yields", "bond market", "default", "bankruptcy", "bank failure", "bailout", "tariff", "tariffs", "oil prices", "OPEC"],
+    "deals": ["merger", "acquisition", "acquire", "acquires", "takeover", "buyout", "IPO", "private equity", "billion deal", "CEO ousted", "CEO resigns", "steps down", "antitrust", "SEC charges", "SEC probe"],
+    "geopolitics": ["invasion", "invades", "missile", "ceasefire", "cease-fire", "sanctions", "coup", "assassination", "nuclear", "declares war", "war with", "airstrike", "airstrikes", "invasion of", "military strike", "troops"],
+    "politics": ["election results", "wins election", "Supreme Court", "shutdown", "impeachment", "impeach", "executive order", "indictment", "indicted"],
+    "disasters": ["earthquake", "hurricane", "outage", "mass casualty", "tsunami", "wildfire", "dozens killed", "hundreds killed", "death toll"]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "news-monitor",
+  "productName": "News Monitor",
+  "version": "1.0.0",
+  "description": "Personal menu bar app that watches WSJ and NYT front pages for major breaking stories.",
+  "main": "dist/main/main.js",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-assets.js",
+    "start": "npm run build && electron .",
+    "dry-run": "npm run build && electron . --dry-run --once",
+    "debug": "npm run build && electron . --dry-run",
+    "icons": "electron scripts/make-icons.js",
+    "pack": "npm run build && electron-builder --mac --dir",
+    "dist": "npm run build && electron-builder --mac",
+    "setup": "npm install && node node_modules/electron/install.js",
+    "test": "npm run build && node --test test/",
+    "check-sources": "npm run build && electron . --check-sources"
+  },
+  "build": {
+    "appId": "local.newsmonitor.app",
+    "productName": "News Monitor",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "assets/**/*",
+      "default-config.json",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.news",
+      "icon": "assets/icon.png",
+      "target": [
+        "dir"
+      ],
+      "identity": "-",
+      "extendInfo": {
+        "LSUIElement": false
+      },
+      "hardenedRuntime": false
+    },
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "onlyLoadAppFromAsar": true,
+      "enableCookieEncryption": false
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "electron": "^45.3.2",
+    "electron-builder": "^26.18.0",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@ghostery/adblocker-electron": "^2.20.3",
+    "darkreader": "^4.9.135"
+  }
+}

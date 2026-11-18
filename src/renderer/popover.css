@@ -1,0 +1,17 @@
+/* Menu bar panel. Shares variables and card styles with styles.css. */
+html.popover, html.popover body { background: transparent; height: 100%; }
+.pop {
+  height: 100%; display: flex; flex-direction: column;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 0 0 1px var(--border) inset;
+}
+.pop-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px 8px 16px; }
+.pop-head h1 { margin: 0; font-size: 14px; font-weight: 700; }
+.pop-head .sub { color: var(--subtle); font-size: 11.5px; }
+.pop-body { flex: 1; overflow-y: auto; padding: 0 6px 8px; }
+.pop-body .section-title { padding: 10px 10px 4px; background: none; position: static; }
+.pop-body .card { padding: 9px 10px; }
+.pop-body .card h3 { font-size: 13.5px; }
+.pop-foot { display: flex; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid var(--border); }
+.pop-foot .btn { flex: 1; }
