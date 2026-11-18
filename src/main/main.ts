@@ -207,7 +207,7 @@ function createWindow(show: boolean) {
   win.on('close', (e) => {
     if (!quitting) {
       e.preventDefault();
-      win?.hide();
+      hideWindow();
     }
   });
   const onVisible = () => {
@@ -220,9 +220,11 @@ function createWindow(show: boolean) {
     onVisible();
   });
   win.on('restore', onVisible);
+  // macOS also sends 'hide' when the window is merely covered, including twice while it animates
+  // into full screen. Leaving the Dock there would make the full-screen Space vanish and drop the
+  // app from Cmd-Tab, so the Dock icon only goes away in hideWindow(), when the user closes it.
   win.on('hide', () => {
     hiddenSince = Date.now();
-    app.dock?.hide();
   });
   win.on('minimize', () => (hiddenSince = Date.now()));
 
@@ -252,6 +254,18 @@ function createWindow(show: boolean) {
 function lockDownAppContents(w: BrowserWindow) {
   w.webContents.on('will-navigate', (e) => e.preventDefault());
   w.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+}
+
+/** Close to the menu bar. A full-screen window leaves full screen first, or its empty Space stays behind. */
+function hideWindow() {
+  if (!win) return;
+  if (win.isFullScreen()) {
+    win.once('leave-full-screen', () => setTimeout(hideWindow, 100));
+    win.setFullScreen(false);
+    return;
+  }
+  win.hide();
+  app.dock?.hide();
 }
 
 function showWindow() {
