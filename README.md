@@ -31,9 +31,11 @@ The app isn't notarized by Apple (that needs a paid developer account), so macOS
 1. Open News Monitor. When macOS says it can't verify the app, click **Done**.
 2. Go to **System Settings → Privacy & Security**, scroll down to *"News Monitor" was blocked*, and click **Open Anyway**.
 
-You only do this once. Or, in Terminal: `xattr -dr com.apple.quarantine "/Applications/News Monitor.app"`.
+You only do this once per download. Or, in Terminal: `xattr -dr com.apple.quarantine "/Applications/News Monitor.app"`.
 
 Requires macOS 12 or later.
+
+**Updating:** quit News Monitor from its menu bar icon, open the new DMG, drag the app into **Applications** and choose **Replace**. Your sources, settings and sign-ins are kept, because they live in your user folder, not inside the app. A new download needs **Open Anyway** once more.
 
 ## Build from source
 

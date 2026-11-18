@@ -1,7 +1,7 @@
 {
   "name": "news-monitor",
   "productName": "News Monitor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A macOS menu bar app that watches the front pages of the papers you subscribe to and tells you when something big happens.",
   "main": "dist/main/main.js",
   "private": true,
@@ -52,7 +52,7 @@
       "enableEmbeddedAsarIntegrityValidation": true
     },
     "afterSign": "scripts/sign-local.js",
-    "copyright": "Copyright \u00a9 2026 Jprdgza",
+    "copyright": "Copyright © 2026 Jprdgza",
     "dmg": {
       "title": "News Monitor",
       "artifactName": "News-Monitor-${version}-${arch}.${ext}",
