@@ -126,6 +126,15 @@ const OWN_FIXES: Fix[] = [
     ignoreInlineStyle: [],
     ignoreImageAnalysis: [],
   },
+  {
+    url: ['bloomberg.com'],
+    // Dark Reader inverts the wordmark SVG, which also turns its dark backdrop into a white box.
+    // The SVG draws in currentColor, so left alone it already takes the theme's text color.
+    invert: [],
+    css: '[data-component="bloombergLogo"] { filter: none !important; background-color: transparent !important; }',
+    ignoreInlineStyle: [],
+    ignoreImageAnalysis: [],
+  },
 ];
 
 const hostOf = (url: string) => {
@@ -146,6 +155,10 @@ function extraCss(p: Palette): string {
   return [
     `::selection { background-color: ${p.accent}55 !important; }`,
     `a:hover { color: ${p.accent} !important; }`,
+    // Video players stack see-through layers (captions, posters) over the picture. Dark Reader
+    // can fill them with the page color, hiding a video that is actually playing (Bloomberg's
+    // Video.js player did this). Keep them see-through; caption boxes keep their own color.
+    'video, .video-js .vjs-tech, .video-js .vjs-poster, .video-js .vjs-text-track-display, .video-js .vjs-text-track-display > div { background-color: transparent !important; }',
   ].join('\n');
 }
 

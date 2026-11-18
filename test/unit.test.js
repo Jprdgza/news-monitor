@@ -352,3 +352,11 @@ test('checkForUpdates defaults on and survives sanitizing', () => {
   assert.equal(sanitizeConfig(defaults, { ...defaults, checkForUpdates: false }).checkForUpdates, false);
   assert.equal(sanitizeConfig(defaults, { ...defaults, checkForUpdates: 'yes' }).checkForUpdates, true);
 });
+
+test('theme keeps video players see-through and fixes the Bloomberg logo', () => {
+  // theme.js needs Electron to load, so check the built rules directly.
+  const js = fs.readFileSync(path.join(__dirname, '..', 'dist', 'main', 'theme.js'), 'utf8');
+  assert.match(js, /\[data-component="bloombergLogo"\] \{ filter: none !important/);
+  assert.match(js, /\.video-js \.vjs-text-track-display[^{]*\{ background-color: transparent !important/);
+  assert.match(js, /url: \['bloomberg\.com'\]/);
+});
