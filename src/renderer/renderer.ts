@@ -93,6 +93,10 @@ function renderChrome() {
   warn.title = state.warnings.join('\n');
   $('st-power').textContent = state.onBattery ? 'On battery · checking less often' : '';
   $('st-dry').textContent = state.dryRun ? 'Dry run: no notifications' : '';
+  const up = $('st-update') as HTMLButtonElement;
+  up.hidden = !state.update;
+  up.textContent = state.update ? `Version ${state.update} available · Download` : '';
+  up.title = 'Downloads the new DMG. Open it and double-click News Monitor to update; your settings and sign-ins are kept.';
 }
 
 // ---------- lists ----------
@@ -285,6 +289,11 @@ async function renderSettings() {
       <div class="row"><span>Forget everything it learned</span><button type="button" class="btn danger" id="reset-prefs">Reset</button></div>
     </div>
 
+    <h3>Updates</h3>
+    <div class="group">
+      ${toggle('checkForUpdates', 'Tell me when a new version is out', cfg.checkForUpdates, 'Checks GitHub once a day. Nothing installs without you.')}
+    </div>
+
     <h3>Battery &amp; performance</h3>
     <div class="group">
       ${toggle('blockAds', 'Block ads and trackers', cfg.efficiency.blockAds, 'Faster pages, less battery')}
@@ -423,6 +432,7 @@ function collect() {
   }
   cfg.personalization.enabled = on('persEnabled');
   cfg.personalization.affectAlerts = on('persAlerts');
+  cfg.checkForUpdates = on('checkForUpdates');
   cfg.efficiency.blockAds = on('blockAds');
   cfg.efficiency.unloadTabsAfterMinutes = n('unloadTabsAfterMinutes');
   cfg.efficiency.batteryIntervalMultiplier = n('batteryIntervalMultiplier');
@@ -473,6 +483,7 @@ $('next-day').onclick = () => {
   refreshList();
 };
 $('run-now').onclick = () => api.runCheck();
+$('st-update').onclick = () => api.downloadUpdate();
 $('bell').onclick = () => setMode(mode === 'alerts' ? 'day' : 'alerts');
 $('gear').onclick = () => setMode(mode === 'settings' ? 'day' : 'settings');
 $('dismiss-onboarding').onclick = () => api.dismissOnboarding();

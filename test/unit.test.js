@@ -322,3 +322,33 @@ test('only real identity providers may open sign-in popups', () => {
     'https://evil-auth.com/', 'https://sso.fake-wsj.com/', 'javascript:alert(1)',
   ]) assert.ok(!isIdentityProvider(bad), bad);
 });
+
+test('update check compares versions and picks the right DMG', () => {
+  const { compareVersions, parseRelease } = dist('update.js');
+  assert.ok(compareVersions('1.0.10', '1.0.9') > 0);
+  assert.ok(compareVersions('v1.1', '1.0.9') > 0);
+  assert.equal(compareVersions('1.0.1', 'v1.0.1'), 0);
+  assert.ok(compareVersions('1.0.0', '1.0.1') < 0);
+  const base = 'https://github.com/Jprdgza/news-monitor/releases/download/v1.2.0/';
+  const rel = {
+    tag_name: 'v1.2.0',
+    html_url: 'https://github.com/Jprdgza/news-monitor/releases/tag/v1.2.0',
+    assets: ['arm64.dmg', 'x64.dmg', 'arm64.zip'].map((s) => ({ name: `News-Monitor-1.2.0-${s}`, browser_download_url: `${base}News-Monitor-1.2.0-${s}` })),
+  };
+  assert.equal(parseRelease(rel, '1.0.1', 'arm64').downloadUrl, `${base}News-Monitor-1.2.0-arm64.dmg`);
+  assert.equal(parseRelease(rel, '1.0.1', 'x64').downloadUrl, `${base}News-Monitor-1.2.0-x64.dmg`);
+  assert.equal(parseRelease(rel, '1.2.0', 'arm64'), null, 'same version is not an update');
+  assert.equal(parseRelease({ ...rel, prerelease: true }, '1.0.1', 'arm64'), null);
+  assert.equal(parseRelease({ ...rel, tag_name: 'nightly' }, '1.0.1', 'arm64'), null);
+  // Links elsewhere are never offered as downloads.
+  const evil = { ...rel, html_url: 'https://evil.example/', assets: [{ name: 'News-Monitor-1.2.0-arm64.dmg', browser_download_url: 'https://evil.example/x.dmg' }] };
+  assert.equal(parseRelease(evil, '1.0.1', 'arm64').downloadUrl, 'https://github.com/Jprdgza/news-monitor/releases/latest');
+});
+
+test('checkForUpdates defaults on and survives sanitizing', () => {
+  const { sanitizeConfig } = dist('configCore.js');
+  const defaults = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'default-config.json'), 'utf8'));
+  assert.equal(defaults.checkForUpdates, true);
+  assert.equal(sanitizeConfig(defaults, { ...defaults, checkForUpdates: false }).checkForUpdates, false);
+  assert.equal(sanitizeConfig(defaults, { ...defaults, checkForUpdates: 'yes' }).checkForUpdates, true);
+});

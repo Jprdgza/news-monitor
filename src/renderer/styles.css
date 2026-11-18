@@ -326,6 +326,8 @@ button:focus-visible, .card:focus-visible, input:focus-visible, select:focus-vis
 .st-src.ok::before { background: var(--ok); }
 .st-src.bad { color: var(--hot); }
 .st-src.bad::before { background: var(--hot); }
+.st-update { font: inherit; color: var(--accent); background: none; border: 1px solid currentColor; border-radius: 999px; padding: 0 8px; cursor: pointer; }
+.st-update:hover { background: color-mix(in srgb, var(--accent) 15%, transparent); }
 .warn { color: var(--warn); overflow: hidden; text-overflow: ellipsis; }
 
 .settings input[type='checkbox']:not(.switch) { accent-color: var(--accent); margin: 0; }

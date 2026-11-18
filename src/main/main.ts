@@ -13,6 +13,7 @@ import { runInHiddenPage } from './pageLoader';
 import { store } from './store';
 import { palette, pushTheme, registerThemeIpc, themedFor, themeOptions } from './theme';
 import { Watcher } from './watcher';
+import { availableUpdate, downloadUpdate, runInstaller, runningFromDiskImage, startUpdateChecks } from './update';
 import { flushCookies, isIdentityProvider, labelPopup, POPUP_OPTIONS, prepareCookieMigration, reencryptCookies, refuseRemoteDebugging } from './security';
 
 refuseRemoteDebugging();
@@ -51,8 +52,11 @@ watcher.dryRun = DRY_RUN;
 const DEV = !app.isPackaged;
 if (DEV && process.env.NEWS_MONITOR_USER_DATA) app.setPath('userData', process.env.NEWS_MONITOR_USER_DATA);
 
+// Opened from a downloaded DMG: offer to install or update instead of starting (see update.ts).
+const INSTALLER = runningFromDiskImage();
+
 // Only one copy may run: two processes sharing the same data files and sign-in sessions would corrupt them.
-const gotLock = app.requestSingleInstanceLock();
+const gotLock = INSTALLER || app.requestSingleInstanceLock();
 if (!gotLock) {
   console.log(
     ONCE || CHECK_SOURCES
@@ -85,7 +89,7 @@ app.on('web-contents-created', (_e, contents) => {
 // Make sure a fresh sign-in is on disk before the app exits.
 let cookiesFlushed = false;
 app.on('will-quit', (e) => {
-  if (cookiesFlushed) return;
+  if (cookiesFlushed || INSTALLER) return;
   e.preventDefault();
   cookiesFlushed = true;
   const sessions = [...tabs.keys()].map((id) => prepareSession(id));
@@ -94,6 +98,7 @@ app.on('will-quit', (e) => {
 
 app.whenReady().then(async () => {
   if (!gotLock) return;
+  if (INSTALLER) return runInstaller();
   app.userAgentFallback = cleanUserAgent(app.userAgentFallback);
   loadConfig();
   prepareCookieMigration(); // before any session opens its cookie database
@@ -128,6 +133,13 @@ app.whenReady().then(async () => {
   createTray();
   createWindow(!app.getLoginItemSettings().wasOpenedAtLogin);
   if (args.includes('--test-notification')) setTimeout(sendTestNotification, 3000);
+  startUpdateChecks(
+    () => getConfig().checkForUpdates,
+    (u) => {
+      pushState();
+      notify({ title: `News Monitor ${u.version} is available`, body: 'Click to download it. Open the DMG and double-click News Monitor to update.', onClick: downloadUpdate });
+    }
+  );
 
   watcher.on('update', pushState);
   watcher.on('stories', () => {
@@ -469,6 +481,7 @@ function buildState() {
     onBattery: powerMonitor.isOnBatteryPower(),
     storiesVersion,
     configVersion,
+    update: getConfig().checkForUpdates ? (availableUpdate()?.version ?? null) : null,
   };
 }
 
@@ -555,6 +568,7 @@ handle('showWindow', () => {
   popover?.hide();
   showWindow();
 });
+handle('downloadUpdate', () => downloadUpdate());
 handle('dismissOnboarding', () => {
   store.state.onboardingDismissed = true;
   store.saveState();
@@ -578,7 +592,9 @@ function createTray() {
 }
 
 function trayMenu() {
+  const update = getConfig().checkForUpdates ? availableUpdate() : null;
   return Menu.buildFromTemplate([
+    ...(update ? [{ label: `Download version ${update.version}…`, click: () => downloadUpdate() }, { type: 'separator' as const }] : []),
     { label: 'Open News Monitor', click: () => showWindow() },
     { type: 'separator' },
     { label: 'Run check now', click: () => watcher.runCheck('tray') },

@@ -18,6 +18,8 @@ export interface Config {
   maxAlertsPerDay: number;
   followUpExtraScore: number;
   dryRun: boolean;
+  /** Look for a newer release on GitHub about once a day (nothing is installed automatically). */
+  checkForUpdates: boolean;
   sources: { enabled: string[]; custom: CustomSourceInput[] };
   polling: {
     timezone: string;

@@ -35,7 +35,12 @@ You only do this once per download. Or, in Terminal: `xattr -dr com.apple.quaran
 
 Requires macOS 12 or later.
 
-**Updating:** quit News Monitor from its menu bar icon, open the new DMG, drag the app into **Applications** and choose **Replace**. Your sources, settings and sign-ins are kept, because they live in your user folder, not inside the app. A new download needs **Open Anyway** once more.
+**Updating:** News Monitor tells you when a new version is out (in the status bar, the menu bar menu and a notification; you can turn this off in Settings → Updates). Click **Download**, open the DMG and double-click **News Monitor**, then click **Update**. It closes the running copy, replaces it in Applications, ejects the DMG and reopens. Your sources, settings and sign-ins are kept, because they live in your user folder, not inside the app.
+
+Two macOS prompts come with each update, because the app isn't signed with a paid Apple Developer ID:
+
+- The new download needs **Open Anyway** once (as above).
+- After it reopens, macOS asks for your Mac password so the new version can unlock your saved sign-ins. Enter it and click **Always Allow**. Clicking **Deny** would leave you signed out of your papers.
 
 ## Build from source
 
@@ -51,7 +56,7 @@ npm run dist         # builds the DMGs and zips for both architectures
 
 Copy `News Monitor.app` to `/Applications` and open it. The build is ad-hoc signed, so the first launch may need right-click → **Open**. Run from `/Applications`, it registers itself to start at login.
 
-**Optional, recommended:** create a self-signed code-signing certificate named *News Monitor Local Signing* (Keychain Access → Certificate Assistant → Create a Certificate…, type *Code Signing*). `npm run pack` signs with it when it exists. macOS then recognizes each new build as the same app and keeps its Keychain access, instead of asking again after every update.
+**Optional, recommended:** create a self-signed code-signing certificate named *News Monitor Local Signing* (Keychain Access → Certificate Assistant → Create a Certificate…, type *Code Signing*). `npm run pack` signs with it when it exists. It gives every build the same identity, so macOS shows each new build as the same app. The Keychain still asks once per new build, because it only skips the question for apps signed with an Apple Developer ID.
 
 To run from source without packaging, use `npm start`.
 

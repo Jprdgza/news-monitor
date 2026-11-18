@@ -11,7 +11,7 @@ export function setNotificationClickHandler(fn: OpenHandler) {
   onOpen = fn;
 }
 
-export function notify(opts: { title: string; subtitle?: string; body: string; sourceId?: string; url?: string; storyId?: string }) {
+export function notify(opts: { title: string; subtitle?: string; body: string; sourceId?: string; url?: string; storyId?: string; onClick?: () => void }) {
   if (!Notification.isSupported()) {
     log.warn('Notifications are not supported on this system');
     return;
@@ -19,7 +19,8 @@ export function notify(opts: { title: string; subtitle?: string; body: string; s
   const n = new Notification({ title: opts.title, subtitle: opts.subtitle, body: opts.body, silent: false });
   live.add(n);
   n.on('click', () => {
-    onOpen(opts.sourceId ?? '', opts.url ?? '', opts.storyId);
+    if (opts.onClick) opts.onClick();
+    else onOpen(opts.sourceId ?? '', opts.url ?? '', opts.storyId);
     live.delete(n);
   });
   n.on('close', () => live.delete(n));

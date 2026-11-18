@@ -31,4 +31,5 @@ contextBridge.exposeInMainWorld('api', {
   openLog: invoke('openLog'),
   showWindow: invoke('showWindow'),
   dismissOnboarding: invoke('dismissOnboarding'),
+  downloadUpdate: invoke('downloadUpdate'),
 });

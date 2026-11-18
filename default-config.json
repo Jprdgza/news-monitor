@@ -5,6 +5,7 @@
   "maxAlertsPerDay": 6,
   "followUpExtraScore": 2.5,
   "dryRun": false,
+  "checkForUpdates": true,
   "sources": {
     "enabled": ["wsj", "nyt", "ft", "bloomberg", "reuters"],
     "custom": []

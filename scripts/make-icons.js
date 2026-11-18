@@ -9,23 +9,26 @@ const jobs = [
   { svg: 'logo.svg', out: 'icon.png', size: 1024 },
   { svg: 'tray.svg', out: 'trayTemplate.png', size: 18 },
   { svg: 'tray.svg', out: 'trayTemplate@2x.png', size: 36 },
+  // The DMG window's background (electron-builder pairs the @2x file for Retina screens).
+  { svg: 'dmg-background.svg', out: 'dmg-background.png', size: 540, height: 380 },
+  { svg: 'dmg-background.svg', out: 'dmg-background@2x.png', size: 1080, height: 760 },
 ];
 
-async function render(svgFile, size) {
+async function render(svgFile, size, height = size) {
   const svg = fs.readFileSync(path.join(assets, svgFile), 'utf8');
-  const win = new BrowserWindow({ show: false, width: size, height: size, frame: false, transparent: true, useContentSize: true, webPreferences: { offscreen: true } });
-  const html = `<html><body style="margin:0;background:transparent"><img width="${size}" height="${size}" src="data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}"></body></html>`;
+  const win = new BrowserWindow({ show: false, width: size, height, frame: false, transparent: true, useContentSize: true, webPreferences: { offscreen: true } });
+  const html = `<html><body style="margin:0;background:transparent"><img width="${size}" height="${height}" src="data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}"></body></html>`;
   await win.loadURL('data:text/html;base64,' + Buffer.from(html).toString('base64'));
   await new Promise((r) => setTimeout(r, 300));
-  const img = await win.webContents.capturePage({ x: 0, y: 0, width: size, height: size });
+  const img = await win.webContents.capturePage({ x: 0, y: 0, width: size, height });
   win.destroy();
-  return img.resize({ width: size, height: size, quality: 'best' }).toPNG();
+  return img.resize({ width: size, height, quality: 'best' }).toPNG();
 }
 
 app.on('window-all-closed', () => {}); // keep going between renders
 app.whenReady().then(async () => {
   for (const j of jobs) {
-    fs.writeFileSync(path.join(assets, j.out), await render(j.svg, j.size));
+    fs.writeFileSync(path.join(assets, j.out), await render(j.svg, j.size, j.height));
     console.log(`wrote assets/${j.out}`);
   }
   app.quit();
