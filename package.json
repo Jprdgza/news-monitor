@@ -2,17 +2,17 @@
   "name": "news-monitor",
   "productName": "News Monitor",
   "version": "1.0.0",
-  "description": "Personal menu bar app that watches WSJ and NYT front pages for major breaking stories.",
+  "description": "A macOS menu bar app that watches the front pages of the papers you subscribe to and tells you when something big happens.",
   "main": "dist/main/main.js",
   "private": true,
   "scripts": {
-    "build": "tsc -p tsconfig.json && node scripts/copy-assets.js",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json && node scripts/copy-assets.js",
     "start": "npm run build && electron .",
     "dry-run": "npm run build && electron . --dry-run --once",
     "debug": "npm run build && electron . --dry-run",
     "icons": "electron scripts/make-icons.js",
-    "pack": "npm run build && electron-builder --mac --dir && node scripts/sign-local.js",
-    "dist": "npm run build && electron-builder --mac",
+    "pack": "npm run build && electron-builder --mac --dir",
+    "dist": "npm run build && electron-builder --mac dmg zip --arm64 --x64",
     "setup": "npm install && node node_modules/electron/install.js",
     "test": "npm run build && node --test test/",
     "check-sources": "npm run build && electron . --check-sources"
@@ -39,7 +39,9 @@
       "extendInfo": {
         "LSUIElement": false
       },
-      "hardenedRuntime": false
+      "hardenedRuntime": false,
+      "minimumSystemVersion": "12.0",
+      "artifactName": "News-Monitor-${version}-${arch}.${ext}"
     },
     "electronFuses": {
       "runAsNode": false,
@@ -48,16 +50,41 @@
       "onlyLoadAppFromAsar": true,
       "enableCookieEncryption": true,
       "enableEmbeddedAsarIntegrityValidation": true
+    },
+    "afterSign": "scripts/sign-local.js",
+    "copyright": "Copyright \u00a9 2026 Jprdgza",
+    "dmg": {
+      "title": "News Monitor",
+      "artifactName": "News-Monitor-${version}-${arch}.${ext}",
+      "contents": [
+        {
+          "x": 150,
+          "y": 190
+        },
+        {
+          "x": 390,
+          "y": 190,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
     }
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
     "electron": "^45.3.2",
     "electron-builder": "^26.18.0",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "darkreader": "^4.9.135"
   },
   "dependencies": {
-    "@ghostery/adblocker-electron": "^2.20.3",
-    "darkreader": "^4.9.135"
-  }
+    "@ghostery/adblocker-electron": "^2.20.3"
+  },
+  "author": "Jprdgza",
+  "homepage": "https://github.com/Jprdgza/news-monitor",
+  "license": "MIT"
 }

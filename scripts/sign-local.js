@@ -12,7 +12,6 @@ const fs = require('fs');
 const path = require('path');
 
 const NAME = process.env.NEWS_MONITOR_SIGNING_IDENTITY || 'News Monitor Local Signing';
-const app = path.join(__dirname, '..', 'release', `mac-${process.arch}`, 'News Monitor.app');
 
 function identity() {
   try {
@@ -24,22 +23,29 @@ function identity() {
   }
 }
 
-const id = identity();
-if (!id) {
-  console.log(`sign-local: no "${NAME}" certificate; keeping the ad-hoc signature.`);
-  process.exit(0);
-}
-if (!fs.existsSync(app)) {
-  console.error(`sign-local: ${app} not found`);
-  process.exit(1);
+function signApp(app) {
+  const id = identity();
+  if (!id) {
+    console.log(`sign-local: no "${NAME}" certificate; keeping the ad-hoc signature.`);
+    return;
+  }
+  const sign = (target, deep) =>
+    execFileSync('codesign', ['--force', ...(deep ? ['--deep'] : []), '--timestamp=none', '--sign', id, target], { stdio: 'inherit' });
+  // Inside-out: helpers and frameworks first, then the app itself.
+  const frameworks = path.join(app, 'Contents', 'Frameworks');
+  for (const item of fs.readdirSync(frameworks)) sign(path.join(frameworks, item), true);
+  sign(app, false);
+  execFileSync('codesign', ['--verify', '--deep', '--strict', app], { stdio: 'inherit' });
+  console.log(`sign-local: signed ${path.basename(app)} with "${NAME}"`);
 }
 
-const sign = (target, deep) =>
-  execFileSync('codesign', ['--force', ...(deep ? ['--deep'] : []), '--timestamp=none', '--sign', id, target], { stdio: 'inherit' });
+// electron-builder `afterSign` hook: runs after packaging and before the DMG/zip is made.
+exports.default = async function afterSign(context) {
+  if (context.electronPlatformName !== 'darwin') return;
+  signApp(path.join(context.appOutDir, `${context.packager.appInfo.productFilename}.app`));
+};
 
-// Inside-out: helpers and frameworks first, then the app itself.
-const frameworks = path.join(app, 'Contents', 'Frameworks');
-for (const item of fs.readdirSync(frameworks)) sign(path.join(frameworks, item), true);
-sign(app, false);
-execFileSync('codesign', ['--verify', '--deep', '--strict', app], { stdio: 'inherit' });
-console.log(`sign-local: signed with "${NAME}"`);
+// Or run directly on an already-packaged app: node scripts/sign-local.js [path/to/App.app]
+if (require.main === module) {
+  signApp(process.argv[2] || path.join(__dirname, '..', 'release', `mac-${process.arch === 'arm64' ? 'arm64' : 'x64'}`, 'News Monitor.app'));
+}

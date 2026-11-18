@@ -22,7 +22,20 @@ It runs entirely on your Mac. There are no servers, accounts, AI APIs or telemet
 - **Learns what you read, gently.** Opens and 👍/👎 nudge your briefings. The effect is bounded, every boost is shown with its reason, and you can reset it.
 - **Custom sources.** Add any news site from Settings with a name and a URL.
 
-## Install
+## Download
+
+Get the latest DMG from [**Releases**](https://github.com/Jprdgza/news-monitor/releases/latest): `arm64` for Apple-silicon Macs (M1 and later), `x64` for Intel. Open it and drag **News Monitor** into **Applications**.
+
+The app isn't notarized by Apple (that needs a paid developer account), so macOS blocks the first launch:
+
+1. Open News Monitor. When macOS says it can't verify the app, click **Done**.
+2. Go to **System Settings → Privacy & Security**, scroll down to *"News Monitor" was blocked*, and click **Open Anyway**.
+
+You only do this once. Or, in Terminal: `xattr -dr com.apple.quarantine "/Applications/News Monitor.app"`.
+
+Requires macOS 12 or later.
+
+## Build from source
 
 Requires macOS and Node.js 22 or newer.
 
@@ -31,6 +44,7 @@ git clone https://github.com/Jprdgza/news-monitor.git
 cd news-monitor
 npm run setup        # installs dependencies and downloads Electron
 npm run pack         # builds release/mac-arm64/News Monitor.app
+npm run dist         # builds the DMGs and zips for both architectures
 ```
 
 Copy `News Monitor.app` to `/Applications` and open it. The build is ad-hoc signed, so the first launch may need right-click → **Open**. Run from `/Applications`, it registers itself to start at login.
